@@ -1,0 +1,26 @@
+# Python virtual environments & caches
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+ENV/
+
+# Configuration (contains sensitive credentials)
+backend/config.json
+
+# Local outputs
+backend/output/
+
+# Node dependencies and build files
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# IDEs & System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

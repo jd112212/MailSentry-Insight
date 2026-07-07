@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailSentry Insight™ | Enterprise Email Intelligence</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="shield-check"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>MailSentry</h1>
+                    <span>Insight Engine v2.0</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-tab="emails">
+                    <i data-lucide="mail"></i>
+                    <span>Processed Emails</span>
+                </button>
+                <button class="nav-item" data-tab="entities">
+                    <i data-lucide="database"></i>
+                    <span>Extracted Entities</span>
+                </button>
+                <button class="nav-item" data-tab="settings">
+                    <i data-lucide="settings"></i>
+                    <span>Connection Settings</span>
+                </button>
+            </nav>
+
+            <div class="connection-status-card" id="connectionStatusCard">
+                <div class="status-indicator-dot offline" id="statusDot"></div>
+                <div class="status-info">
+                    <p class="status-label">Gmail Connection</p>
+                    <p class="status-value" id="statusText">Checking...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-workspace">
+            <header class="workspace-header">
+                <div class="header-title">
+                    <h2 id="pageTitle">Analytics Dashboard</h2>
+                    <p id="pageDescription" class="header-subtitle">Visual overview of email intelligence metrics</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="syncBtn">
+                        <i data-lucide="rotate-cw" id="syncIcon"></i>
+                        <span>Sync Inbox</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="workspace-content">
+                <!-- Notifications & Alerts Container -->
+                <div id="alertContainer" class="alert-container"></div>
+
+                <!-- 1. DASHBOARD TAB -->
+                <section id="tab-dashboard" class="tab-section active">
+                    <!-- KPI Cards Grid -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon icon-blue">
+                                <i data-lucide="mail"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Total Emails</span>
+                                <h3 class="kpi-value" id="kpiTotal">0</h3>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon icon-green">
+                                <i data-lucide="trending-up"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Sales Leads</span>
+                                <h3 class="kpi-value" id="kpiLeads">0</h3>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon icon-orange">
+                                <i data-lucide="file-text"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Invoice Count</span>
+                                <h3 class="kpi-value" id="kpiInvoices">0</h3>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon icon-purple">
+                                <i data-lucide="cpu"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Extraction Efficiency</span>
+                                <h3 class="kpi-value" id="kpiRate">0%</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Charts Section -->
+                    <div class="charts-container">
+                        <!-- Left Panel: Category distribution and daily volume -->
+                        <div class="chart-card pie-chart-wrapper">
+                            <div class="chart-header">
+                                <h4>Category Distribution</h4>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card line-chart-wrapper">
+                            <div class="chart-header">
+                                <h4>Daily Email Volume</h4>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="volumeChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card bar-chart-wrapper full-width">
+                            <div class="chart-header">
+                                <h4>Top 5 Senders Breakdown</h4>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="sendersChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. PROCESSED EMAILS TAB -->
+                <section id="tab-emails" class="tab-section">
+                    <div class="table-card">
+                        <div class="table-actions">
+                            <div class="search-box">
+                                <i data-lucide="search"></i>
+                                <input type="text" id="emailSearch" placeholder="Search sender, subject or category...">
+                            </div>
+                            <div class="filter-group">
+                                <select id="emailCategoryFilter">
+                                    <option value="ALL">All Categories</option>
+                                    <option value="Sales Lead">Sales Lead</option>
+                                    <option value="Support">Support</option>
+                                    <option value="Invoice">Invoice</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Internal">Internal</option>
+                                    <option value="Spam">Spam</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="emailsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Sender</th>
+                                        <th>Subject</th>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                        <th>Body Preview</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="emailsTableBody">
+                                    <tr>
+                                        <td colspan="6" class="table-empty">No emails loaded. Click "Sync Inbox" to retrieve emails.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. EXTRACTED ENTITIES TAB -->
+                <section id="tab-entities" class="tab-section">
+                    <div class="table-card">
+                        <div class="table-actions">
+                            <div class="search-box">
+                                <i data-lucide="search"></i>
+                                <input type="text" id="entitySearch" placeholder="Search entities...">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="entitiesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Email ID</th>
+                                        <th>Phone Number</th>
+                                        <th>Invoice ID</th>
+                                        <th>Ticket ID</th>
+                                        <th>Monetary Value</th>
+                                        <th>Order ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="entitiesTableBody">
+                                    <tr>
+                                        <td colspan="6" class="table-empty">No entities extracted yet. Run "Sync Inbox" to extract.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. CONNECTION SETTINGS TAB -->
+                <section id="tab-settings" class="tab-section">
+                    <div class="settings-grid">
+                        <div class="settings-card card-form">
+                            <div class="card-header">
+                                <h3>Gmail Authentication & Sync Settings</h3>
+                                <p>Provide app passwords and options to initialize communication</p>
+                            </div>
+                            
+                            <form id="settingsForm">
+                                <div class="form-group">
+                                    <label for="gmailUsername">Gmail Address</label>
+                                    <div class="input-icon-wrapper">
+                                        <i data-lucide="user"></i>
+                                        <input type="email" id="gmailUsername" required placeholder="example@gmail.com">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="gmailAppPassword">Google App Password</label>
+                                    <div class="input-icon-wrapper">
+                                        <i data-lucide="key"></i>
+                                        <input type="password" id="gmailAppPassword" required placeholder="16-character app password">
+                                    </div>
+                                    <small class="form-help">
+                                        Use a secure Google App Password, NOT your regular account password. 
+                                        <a href="https://support.google.com/accounts/answer/185833?hl=en" target="_blank">Setup Instructions <i data-lucide="external-link" style="display:inline; width:12px; height:12px;"></i></a>
+                                    </small>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="fetchLimit">Fetch Limit</label>
+                                        <input type="number" id="fetchLimit" required min="5" max="200" value="50">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="appendMode">Write Option</label>
+                                        <select id="appendMode">
+                                            <option value="true">Append & Deduplicate</option>
+                                            <option value="false">Overwrite Clean CSVs</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary" id="saveConfigBtn">
+                                        <i data-lucide="save"></i>
+                                        <span>Save Configuration</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="settings-card info-card">
+                            <div class="card-header">
+                                <h3>Operational Status</h3>
+                            </div>
+                            <div class="operational-logs">
+                                <div class="log-row">
+                                    <span class="log-label">Backend API URL</span>
+                                    <span class="log-value code">/api/</span>
+                                </div>
+                                <div class="log-row">
+                                    <span class="log-label">Emails File</span>
+                                    <span class="log-value code">output/processed_emails.csv</span>
+                                </div>
+                                <div class="log-row">
+                                    <span class="log-label">Entities File</span>
+                                    <span class="log-value code">output/extracted_entities.csv</span>
+                                </div>
+                                <div class="log-row">
+                                    <span class="log-label">IMAP Server</span>
+                                    <span class="log-value">imap.gmail.com:993</span>
+                                </div>
+                            </div>
+                            <div class="system-status-banner">
+                                <div class="icon-pulse-wrapper">
+                                    <div class="pulse-dot"></div>
+                                </div>
+                                <div class="banner-text">
+                                    <p>Engine Online</p>
+                                    <span>FastAPI core processes emails safely in the background</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
