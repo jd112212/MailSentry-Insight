@@ -24,15 +24,23 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Then open **http://localhost:5000** in your browser. Click **"Run Analysis"** to:
-1. Connect to Gmail via IMAP (App Password auth)
-2. Fetch the last N emails (configurable in the UI)
-3. Clean, classify, and extract entities
-4. Export `output/processed_emails.csv` and `output/extracted_entities.csv`
-5. Generate and display the 3 analytics charts + summary stats
+Your MailSentry Insight™ FastAPI backend is now live:
+
+🌐 App URL	**http://localhost:8000**
+📡 API Docs	**http://localhost:8000/docs**
+🔄 Status	Running with --reload (auto-restarts on file changes)
+
+Server startup log confirmed:
+INFO: Uvicorn running on **http://0.0.0.0:8000** (Press CTRL+C to quit)
+INFO: Application startup complete.
+
+To use the app:
+1.Open your browser → go to **http://localhost:8000**
+2.Go to Connection Settings tab → enter your Gmail address + Google App Password
+3.Click Save Configuration
+4.Click Sync Inbox on the dashboard to fetch & analyze your emails
 
 ## Project structure
-
 ```
 MailSentry_Insight/
 ├── main.py                     # Flask backend + API routes
